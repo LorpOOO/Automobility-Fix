@@ -1,0 +1,26 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.automobilityfix.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "dev.automobilityfix.mixinplugin.FixMixinPlugin",
+  "mixins": [
+    "AutoMechanicTableScreenHandlerMixin",
+    "AutomobileAssemblerBlockEntityMixin",
+    "AutomobileEntityMixin",
+    "AutomobileItemMixin",
+    "AutopilotFrontAttachmentMixin",
+    "DisplacementMixin",
+    "EntityMixin",
+    "HitboxEntityMixin",
+    "ftbchunks.ClaimedChunkManagerImplMixin",
+    "opac.ChunkProtectionEntityHelperMixin",
+    "opac.ChunkProtectionMixin"
+  ],
+  "client": [
+    "AutoMechanicTableScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

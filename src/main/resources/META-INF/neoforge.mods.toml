@@ -1,0 +1,58 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "MIT"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "Lorp_OOO"
+description = '''
+Unofficial addon for Automobility that fixes hitbox desync, ghost hitboxes, physics flings,
+trunk duplication, Auto Mechanic Table crashes, and conflicts with Open Parties and Claims.
+'''
+
+[[mixins]]
+config = "automobility_fix.mixins.json"
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21,1.21.1]"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "automobility"
+type = "required"
+versionRange = "[0.5.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "ftbteams"
+type = "optional"
+versionRange = "[2101.1.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "openpartiesandclaims"
+type = "optional"
+versionRange = "[0.30,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "ftbchunks"
+type = "optional"
+versionRange = "[2101.1.0,)"
+ordering = "AFTER"
+side = "BOTH"
