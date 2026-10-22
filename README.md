@@ -1,37 +1,49 @@
 # Automobility Fix (NeoForge 1.21.1)
 
-Автор: **Lorp_OOO**
+Author: **Lorp_OOO**
 
-Неофіційний аддон для **Automobility 0.5.0.h**, що виправляє баги мода та конфлікти з модами приватів і команд (Open Parties and Claims, FTB Teams, FTB Chunks).
+An unofficial addon for **[Automobility](https://modrinth.com/mod/automobility) 0.5.0.h** that fixes bugs in the mod and its conflicts with claim and team mods (Open Parties and Claims, FTB Teams, FTB Chunks).
 
-Jar: `build/libs/automobility_fix-1.0.0+1.21.1-neoforge.jar`. Мод потрібен **і на сервері, і на клієнті**.
-Конфіг: `config/automobility_fix-server.toml` (налаштування власників — розділ `ownership`).
+This is an addon, not a fork: it contains no Automobility code and requires the original Automobility to be installed. All fixes are applied with mixins.
 
-## Що виправлено (і справжня причина)
+- Required on **both server and client**.
+- Config: `config/automobility_fix-server.toml` (ownership settings are in the `ownership` section).
+- Optional integrations: Open Parties and Claims, FTB Teams, FTB Chunks. Each one is enabled only when that mod is installed.
 
-| Баг зі списку | Причина в коді Automobility | Виправлення |
+## What is fixed (and the actual cause)
+
+| Bug | Cause in Automobility | Fix |
 |---|---|---|
-| Хітбокси-«привиди», машина не сідається після перезаходу / перезавантаження чанка | `HitboxEntity` зберігався в чанк, але без посилання на машину. Завантажена копія не тікала в «лінивих» чанках і лишалась назавжди. Хітбокси рухались лише у власному тіку | Хітбокси більше не зберігаються; старі збережені видаляються при завантаженні; машина сама ставить свої хітбокси щотіку; при видаленні машини її хітбокси видаляються одразу |
-| Невидима перешкода після спроби зламати машину | Осиротілий хітбокс лишався колізійним на клієнті | Хітбокс без машини не має колізії й не вибирається курсором |
-| Спам AABB / помилки координат | NaN/нескінченність у фізиці (нормалізація нульового вектора в підвісці, ділення на вагу 0) | Санітизація швидкостей, позиції, підвіски |
-| Машини злітають на межі чанків / при зіткненні | (1) `slopeStickingTimer` ніколи не зменшувався (`Math.max(0, t--)`) — вічне притягування до землі; (2) `(int)` замість `floor` → неправильний блок при від'ємних координатах; (3) зіткнення машин накопичували імпульс без ліміту | Таймер виправлено, `BlockPos.containing`, ліміт імпульсу зіткнень і доданої швидкості (налаштовується) |
-| Дюп/війд предметів багажника | Меню багажника (`stillValid` завжди `true`) лишалося відкритим після знищення машини/навісного — предмети випадали і їх ще можна було забрати з меню | Меню закриваються перед випаданням предметів, а також при віддаленні >8 блоків чи знищенні машини |
-| Краш Auto Mechanic Table | NPE при наведенні на порожню категорію рецептів (рецепти видалено/не синхронізовано іншими модами); output-слот брав участь у «зібрати все» | Порожня категорія = порожній список; output виключено з pick-all; shift-клік заповнює і 9-й слот |
-| Краш рендеру автопілота | `Math.clamp(anim, 0, values().length)` → вихід за межі масиву | Межа `length - 1` |
-| Автопілот провалюється / зникає в незавантажених чанках | Рух у незавантажений чанк = нема колізії → падіння | Машина зупиняється перед незавантаженим (а без гравця — нетікаючим) чанком |
-| OPAC: «дубль» машини на межі приватів | OPAC телепортує машину назад на сервері, але клієнт водія про це не дізнається | Сервер надсилає водію корекцію позиції й зупиняє машину |
-| OPAC: висаджування водія в приваті | Бар'єр OPAC викидає гравця з машини | Якщо пасажира не пустить бар'єр — зупиняється вся машина на межі |
-| OPAC: перевірки йшли на `automobility:hitbox` у чанку хітбокса | Ціль взаємодії — хітбокс | Перевірки йдуть на саму машину (її тип і чанк); у конфігах OPAC достатньо `automobility:automobile` |
-| Крадіжка машин і багажника | Машина не мала власника | Власник = хто зібрав/поставив машину. Власником вважається і вся його команда (FTB Teams або партія OPAC; союзники — опційно). Решта гравців не можуть сісти, відкрити багажник чи розібрати машину — будь-де, не лише в приватах |
-| Власник не може користуватись машиною в чужому приваті | OPAC / FTB Chunks не знають про власника машини | Власник і його команда можуть користуватись своєю машиною і в чужих приватах OPAC та FTB Chunks; інші правила привату не змінюються |
+| Ghost hitboxes; vehicle can't be entered after rejoining or reloading a chunk | `HitboxEntity` was saved to the chunk without a link to its vehicle. The loaded copy did not tick in lazy chunks and stayed forever. Hitboxes only moved in their own tick | Hitboxes are no longer saved; old saved ones are removed on load; the vehicle positions its hitboxes every tick; a vehicle's hitboxes are removed together with it |
+| Invisible obstacle left after trying to break a vehicle | An orphaned hitbox stayed collidable on the client | A hitbox without a vehicle has no collision and can't be targeted |
+| AABB errors / invalid coordinates | NaN/infinite values in physics (normalizing a zero vector in the suspension, division by a weight of 0) | Speeds, position and suspension are sanitized |
+| Vehicles flung into the air at chunk borders or in collisions | (1) `slopeStickingTimer` never decremented (`Math.max(0, t--)`), so the vehicle was pulled into the ground forever; (2) `(int)` instead of `floor` read the wrong block at negative coordinates; (3) vehicle-to-vehicle collisions accumulated impulse without limit | Timer fixed, `BlockPos.containing`, configurable limits for collision impulse and added velocity |
+| Trunk item duplication / voiding | The trunk menu (`stillValid` always `true`) stayed open after the vehicle or attachment was destroyed, so items dropped and could still be taken from the menu | Menus are closed before items drop, and also when moving more than 8 blocks away or when the vehicle is destroyed |
+| Auto Mechanic Table crash | NPE when hovering an empty recipe category (recipes removed or not synced by other mods); the output slot took part in "collect all" | An empty category is an empty list; output slot excluded from pick-all; shift-click also fills the 9th input slot |
+| Autopilot render crash | `Math.clamp(anim, 0, values().length)` went out of array bounds | Upper bound is `length - 1` |
+| Autopilot vehicles falling through or vanishing in unloaded chunks | Moving into an unloaded chunk means no collision, so the vehicle falls | The vehicle stops before an unloaded chunk (or, without a player driving, a non-ticking chunk) |
+| OPAC: vehicle "duplicated" at claim borders | OPAC moves the vehicle back on the server, but the driver's client never learns about it | The server sends the driver a position correction and stops the vehicle |
+| OPAC: driver ejected in a claim | The OPAC barrier throws the player out of the vehicle | If a passenger would be blocked by the barrier, the whole vehicle stops at the border instead |
+| OPAC: checks were made against `automobility:hitbox` in the hitbox's chunk | The interaction target is the hitbox | Checks use the vehicle itself (its type and chunk); `automobility:automobile` is enough in OPAC configs |
+| Vehicle and trunk theft | Vehicles had no owner | The owner is whoever assembled or placed the vehicle. The owner's whole team counts as owners too (FTB Teams or OPAC party; allies optional). Other players can't get in, open the trunk or dismantle the vehicle — anywhere, not only in claims |
+| Owner can't use their vehicle in someone else's claim | OPAC / FTB Chunks don't know about the vehicle's owner | The owner and their team can use their vehicle in foreign OPAC and FTB Chunks claims too; other claim rules are unchanged |
 
-Машини, поставлені **до** встановлення аддона, власника не мають: ними може користуватись будь-хто, а в приватах діють звичайні правила.
+Vehicles placed **before** installing the addon have no owner: anyone can use them, and normal claim rules apply.
 
-Необов'язкові інтеграції: Open Parties and Claims, FTB Teams, FTB Chunks.
+## Config (`ownership` section)
 
+| Option | Default | Meaning |
+|---|---|---|
+| `ownerProtection` | `true` | Only the owner and their team can use the vehicle |
+| `trustPartyMembers` | `true` | Members of the owner's FTB Teams / OPAC team count as owners |
+| `trustAllies` | `false` | Allies of the owner's team count as owners too |
+| `ownerTeamIgnoresClaims` | `true` | The owner and their team may use the vehicle inside anyone's claims |
+| `opsBypass` | `false` | Operators may use any vehicle (in LAN worlds with cheats, every player is an operator) |
 
-## Збірка
+## Building
 
 ```bash
 ./gradlew build
 ```
+
+The jar is written to `build/libs/`.
