@@ -23,6 +23,11 @@ repositories {
         url = "https://maven.architectury.dev/"
         content { includeGroup "dev.architectury" }
     }
+    maven {
+        name = "JitPack"
+        url = "https://jitpack.io"
+        content { includeGroup "com.github.bawnorton.mixinsquared" }
+    }
     mavenCentral()
     exclusiveContent {
         forRepository {
@@ -54,6 +59,7 @@ neoForge {
         }
         server {
             server()
+            gameDirectory = project.file('run-server')
             programArgument '--nogui'
         }
     }
@@ -67,6 +73,10 @@ neoForge {
 
 dependencies {
     implementation "maven.modrinth:automobility:${automobility_version}"
+
+    // Lets us cancel Automobility's client-only EntityMixin on dedicated servers (bundled inside our jar)
+    compileOnly "com.github.bawnorton.mixinsquared:mixinsquared-common:${mixinsquared_version}"
+    implementation(jarJar("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:${mixinsquared_version}"))
     compileOnly "maven.modrinth:open-parties-and-claims:${opac_version}"
     compileOnly("dev.ftb.mods:ftb-teams-neoforge:${ftb_teams_version}") { transitive = false }
     compileOnly("dev.ftb.mods:ftb-chunks-neoforge:${ftb_chunks_version}") { transitive = false }

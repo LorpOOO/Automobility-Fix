@@ -1,5 +1,7 @@
 package dev.automobilityfix.mixinplugin;
 
+import com.bawnorton.mixinsquared.MixinSquaredBootstrap;
+import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import net.neoforged.fml.loading.LoadingModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -18,6 +20,9 @@ public class FixMixinPlugin implements IMixinConfigPlugin {
         var mods = LoadingModList.get();
         this.opacPresent = mods != null && mods.getModFileById("openpartiesandclaims") != null;
         this.ftbChunksPresent = mods != null && mods.getModFileById("ftbchunks") != null;
+
+        MixinSquaredBootstrap.init();
+        MixinCancellerRegistrar.register(new AutomobilityMixinCanceller());
     }
 
     @Override
